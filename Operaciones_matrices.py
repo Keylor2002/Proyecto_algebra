@@ -24,6 +24,10 @@ def mostrar_pasos_multiplicacion(A, B):
             pasos += " + ".join(elementos) + f" = {resultado[i, j]}\n"
     return pasos
 
+def mostrar_matriz(matriz):
+    st.write("Matriz:")
+    st.table(matriz)
+
 def main():
     st.title("Calculadora de Operaciones Matriciales")
     operacion = st.selectbox("Selecciona una operación", ["Suma", "Resta", "Multiplicación"])
@@ -51,6 +55,12 @@ def main():
                     st.error("Error: El número de columnas de la primera matriz debe ser igual al número de filas de la segunda matriz.")
                     return
             
+            # Mostrar matrices ingresadas
+            st.subheader("Matriz A:")
+            mostrar_matriz(A)
+            st.subheader("Matriz B:")
+            mostrar_matriz(B)
+            
             if operacion == "Suma":
                 resultado = A + B
                 pasos = mostrar_pasos_suma(A, B)
@@ -61,9 +71,9 @@ def main():
                 resultado = np.dot(A, B)
                 pasos = mostrar_pasos_multiplicacion(A, B)
             
-            st.subheader("Resultado:")
-            st.write(resultado)
-            st.subheader("Paso a paso:")
+            st.subheader("Resultado de la operación:")
+            mostrar_matriz(resultado)
+            st.subheader("Explicación detallada del cálculo:")
             st.text(pasos)
         except Exception as e:
             st.error(f"Error en el cálculo: {e}")
