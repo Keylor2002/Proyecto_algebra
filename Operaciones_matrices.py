@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from sympy import symbols, Matrix, simplify
+from sympy import symbols, Matrix, simplify, N
 
 def ingresar_matriz(filas, columnas, matriz_nombre):
     """Crea una interfaz de ingreso de datos en formato matricial."""
@@ -34,8 +34,8 @@ def realizar_operacion(A, B, operacion):
     return truncar_numeros(resultado)
 
 def truncar_numeros(matriz):
-    """Trunca los decimales si el número es entero."""
-    return matriz.applyfunc(lambda x: int(x) if x.is_number and x == int(x) else x)
+    """Formatea los números eliminando ceros innecesarios y limitando decimales."""
+    return matriz.applyfunc(lambda x: int(x) if x.is_number and x == int(x) else round(N(x, 1), 1))
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
@@ -44,48 +44,7 @@ def matriz_a_dataframe(matriz):
 def main():
     st.title("Calculadora de Operaciones Matriciales con Letras")
 
-    # Introducción general
-    st.markdown("""
-    ## ¿Qué es una matriz?
-    Una matriz es una estructura matemática en forma de tabla de filas y columnas que contiene números o expresiones algebraicas. Se usa en muchas áreas como ingeniería, economía, estadística y computación.
-
-    ## ¿Cómo funcionan las operaciones matriciales?
-    - **Suma de matrices:** Se suman los elementos correspondientes de cada matriz. Solo se pueden sumar matrices del mismo tamaño.
-    - **Resta de matrices:** Similar a la suma, pero restando los elementos correspondientes.
-    - **Multiplicación de matrices:** Se multiplican filas de la primera matriz por columnas de la segunda, sumando los productos obtenidos.
-    """)
-
     operacion = st.selectbox("Selecciona una operación", ["Suma", "Resta", "Multiplicación"])
-    
-    # Explicación de cada operación
-    if operacion == "Suma":
-        st.markdown("""
-        ### Suma de Matrices
-        Para sumar matrices, se suman los elementos correspondientes de cada una.
-
-        **Ejemplo:**  
-        Si A = \[\[1, 2\], \[3, 4\]\] y B = \[\[5, 6\], \[7, 8\]\],  
-        entonces A + B = \[\[1+5, 2+6\], \[3+7, 4+8\]\] = \[\[6, 8\], \[10, 12\]\].
-        """)
-    elif operacion == "Resta":
-        st.markdown("""
-        ### Resta de Matrices
-        Se restan los elementos correspondientes de cada matriz.
-
-        **Ejemplo:**  
-        Si A = \[\[5, 6\], \[7, 8\]\] y B = \[\[1, 2\], \[3, 4\]\],  
-        entonces A - B = \[\[5-1, 6-2\], \[7-3, 8-4\]\] = \[\[4, 4\], \[4, 4\]\].
-        """)
-    elif operacion == "Multiplicación":
-        st.markdown("""
-        ### Multiplicación de Matrices
-        Se multiplica cada fila de la primera matriz por cada columna de la segunda.
-
-        **Ejemplo:**  
-        Si A = \[\[1, 2\], \[3, 4\]\] y B = \[\[5, 6\], \[7, 8\]\],  
-        entonces el resultado se obtiene sumando los productos:  
-        A × B = \[\[1×5 + 2×7, 1×6 + 2×8\], \[3×5 + 4×7, 3×6 + 4×8\]\].
-        """)
 
     filas = st.number_input("Número de filas de la primera matriz", min_value=1, step=1, value=2)
     columnas = st.number_input("Número de columnas de la primera matriz", min_value=1, step=1, value=2)
