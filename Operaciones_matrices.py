@@ -55,7 +55,7 @@ def realizar_operacion(A, B, operacion):
 
 def formatear_resultado(matriz):
     """Formatea los números eliminando decimales innecesarios y mostrando fracciones y letras simplificadas."""
-    return matriz.applyfunc(lambda x: simplify(x))  # Simplifica las expresiones
+    return matriz.applyfunc(lambda x: simplify(x).expand())  # Simplifica y expande expresiones como 2a + 2a a 4a
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
