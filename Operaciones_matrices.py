@@ -1,83 +1,70 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
+from fractions import Fraction
 
-def mostrar_pasos_suma(A, B):
-    pasos = "Paso a paso de la suma de matrices:\n"
-    for i in range(A.shape[0]):
-        for j in range(A.shape[1]):
-            pasos += f"({A[i, j]}) + ({B[i, j]}) = {A[i, j] + B[i, j]}\n"
-    return pasos
+def formato_numero(num, modo):
+    """Formatea los números según el modo seleccionado."""
+    if modo == "Decimal":
+        return f"{num:.1f}"
+    elif modo == "Fracción":
+        return str(Fraction(num).limit_denominator())
+    elif modo == "Letras":
+        return chr(65 + int(num) % 26)  # Convierte números a letras tipo A, B, C...
+    return str(num)
 
-def mostrar_pasos_resta(A, B):
-    pasos = "Paso a paso de la resta de matrices:\n"
-    for i in range(A.shape[0]):
-        for j in range(A.shape[1]):
-            pasos += f"({A[i, j]}) - ({B[i, j]}) = {A[i, j] - B[i, j]}\n"
-    return pasos
+def matriz_a_dataframe(matriz, modo):
+    """Convierte una matriz en un DataFrame para mostrar en Streamlit."""
+    df = pd.DataFrame(matriz)
+    return df.applymap(lambda x: formato_numero(x, modo))
 
-def mostrar_pasos_multiplicacion(A, B):
-    pasos = "Paso a paso de la multiplicación de matrices:\n"
-    resultado = np.dot(A, B)
-    for i in range(A.shape[0]):
-        for j in range(B.shape[1]):
-            elementos = [f"({A[i, k]}*{B[k, j]})" for k in range(A.shape[1])]
-            pasos += " + ".join(elementos) + f" = {resultado[i, j]}\n"
-    return pasos
-
-def mostrar_matriz(matriz):
-    st.write("Matriz:")
-    st.table(matriz)
+def ingresar_matriz(filas, columnas):
+    """Crea una interfaz de ingreso de datos en formato matricial."""
+    matriz = []
+    for i in range(filas):
+        fila = []
+        cols = st.columns(columnas)
+        for j in range(columnas):
+            valor = cols[j].text_input(f"({i+1},{j+1})", value="0", key=f"cell_{i}_{j}")
+            try:
+                fila.append(float(valor))
+            except ValueError:
+                fila.append(0)
+        matriz.append(fila)
+    return np.array(matriz)
 
 def main():
     st.title("Calculadora de Operaciones Matriciales")
     operacion = st.selectbox("Selecciona una operación", ["Suma", "Resta", "Multiplicación"])
-    filas = st.number_input("Número de filas de la primera matriz", min_value=1, step=1)
-    columnas = st.number_input("Número de columnas de la primera matriz", min_value=1, step=1)
+    modo_visualizacion = st.radio("Modo de visualización de números:", ["Decimal", "Fracción", "Letras"], horizontal=True)
     
-    A_input = st.text_area("Ingresa la primera matriz (separada por espacios y saltos de línea)")
+    filas = st.number_input("Número de filas de la primera matriz", min_value=1, step=1, value=2)
+    columnas = st.number_input("Número de columnas de la primera matriz", min_value=1, step=1, value=2)
+    
+    st.subheader("Matriz A")
+    A = ingresar_matriz(filas, columnas)
+    
     if operacion in ["Suma", "Resta"]:
-        B_input = st.text_area("Ingresa la segunda matriz (mismo tamaño que la primera)")
+        st.subheader("Matriz B (mismo tamaño que A)")
+        B = ingresar_matriz(filas, columnas)
     else:
-        columnas_B = st.number_input("Número de columnas de la segunda matriz", min_value=1, step=1)
-        B_input = st.text_area("Ingresa la segunda matriz (compatible con la primera)")
+        columnas_B = st.number_input("Número de columnas de la segunda matriz", min_value=1, step=1, value=2)
+        st.subheader("Matriz B")
+        B = ingresar_matriz(columnas, columnas_B)
     
     if st.button("Calcular"):
-        try:
-            A = np.array([list(map(float, row.split())) for row in A_input.strip().split("\n")])
-            B = np.array([list(map(float, row.split())) for row in B_input.strip().split("\n")])
-            
-            if operacion == "Suma" or operacion == "Resta":
-                if A.shape != B.shape:
-                    st.error("Error: Las matrices deben tener las mismas dimensiones para la suma o resta.")
-                    return
-            elif operacion == "Multiplicación":
-                if A.shape[1] != B.shape[0]:
-                    st.error("Error: El número de columnas de la primera matriz debe ser igual al número de filas de la segunda matriz.")
-                    return
-            
-            # Mostrar matrices ingresadas
-            st.subheader("Matriz A:")
-            mostrar_matriz(A)
-            st.subheader("Matriz B:")
-            mostrar_matriz(B)
-            
-            if operacion == "Suma":
-                resultado = A + B
-                pasos = mostrar_pasos_suma(A, B)
-            elif operacion == "Resta":
-                resultado = A - B
-                pasos = mostrar_pasos_resta(A, B)
-            elif operacion == "Multiplicación":
-                resultado = np.dot(A, B)
-                pasos = mostrar_pasos_multiplicacion(A, B)
-            
-            st.subheader("Resultado de la operación:")
-            mostrar_matriz(resultado)
-            st.subheader("Explicación detallada del cálculo:")
-            st.text(pasos)
-        except Exception as e:
-            st.error(f"Error en el cálculo: {e}")
+        if operacion == "Suma" and A.shape == B.shape:
+            resultado = A + B
+        elif operacion == "Resta" and A.shape == B.shape:
+            resultado = A - B
+        elif operacion == "Multiplicación" and A.shape[1] == B.shape[0]:
+            resultado = np.dot(A, B)
+        else:
+            st.error("Dimensiones incorrectas para la operación.")
+            return
+        
+        st.subheader("Resultado")
+        st.dataframe(matriz_a_dataframe(resultado, modo_visualizacion).style.applymap(lambda x: "background-color: #a0c4ff;"))
 
 if __name__ == "__main__":
     main()
-
