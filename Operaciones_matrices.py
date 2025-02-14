@@ -11,7 +11,6 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
         for j in range(columnas):
             valor = cols[j].text_input(f"({i+1},{j+1})", value="0", key=f"{matriz_nombre}_cell_{i}_{j}")
             try:
-                # Si es número, lo convierte a float, si es letra, lo deja como símbolo
                 fila.append(float(valor) if valor.replace('.', '', 1).isdigit() else symbols(valor))
             except ValueError:
                 fila.append(symbols(valor))
@@ -24,22 +23,23 @@ def realizar_operacion(A, B, operacion):
     matriz_B = Matrix(B)
     
     if operacion == "Suma":
-        return matriz_A + matriz_B
+        resultado = matriz_A + matriz_B
     elif operacion == "Resta":
-        return matriz_A - matriz_B
+        resultado = matriz_A - matriz_B
     elif operacion == "Multiplicación":
-        return matriz_A * matriz_B
+        resultado = matriz_A * matriz_B
     else:
         return None
 
+    return truncar_numeros(resultado)
+
 def truncar_numeros(matriz):
     """Trunca los decimales si el número es entero."""
-    return [[int(x) if x.is_number and x == int(x) else x for x in fila] for fila in matriz]
+    return matriz.applyfunc(lambda x: int(x) if x.is_number and x == int(x) else x)
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
-    matriz_truncada = truncar_numeros(matriz)
-    return pd.DataFrame(matriz_truncada)
+    return pd.DataFrame(matriz.tolist())
 
 def main():
     st.title("Calculadora de Operaciones Matriciales con Letras")
@@ -47,7 +47,7 @@ def main():
     # Introducción general
     st.markdown("""
     ## ¿Qué es una matriz?
-    Una matriz es una estructura matemática en forma de tabla de filas y columnas que contiene números o expresiones algebraicas. Se utiliza en muchas áreas como ingeniería, economía, estadística y computación.
+    Una matriz es una estructura matemática en forma de tabla de filas y columnas que contiene números o expresiones algebraicas. Se usa en muchas áreas como ingeniería, economía, estadística y computación.
 
     ## ¿Cómo funcionan las operaciones matriciales?
     - **Suma de matrices:** Se suman los elementos correspondientes de cada matriz. Solo se pueden sumar matrices del mismo tamaño.
@@ -62,7 +62,7 @@ def main():
         st.markdown("""
         ### Suma de Matrices
         Para sumar matrices, se suman los elementos correspondientes de cada una.
-        
+
         **Ejemplo:**  
         Si A = \[\[1, 2\], \[3, 4\]\] y B = \[\[5, 6\], \[7, 8\]\],  
         entonces A + B = \[\[1+5, 2+6\], \[3+7, 4+8\]\] = \[\[6, 8\], \[10, 12\]\].
