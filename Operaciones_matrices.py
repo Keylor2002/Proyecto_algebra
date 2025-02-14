@@ -54,8 +54,8 @@ def realizar_operacion(A, B, operacion):
     return formatear_resultado(resultado)
 
 def formatear_resultado(matriz):
-    """Formatea los números eliminando decimales innecesarios y mostrando fracciones."""
-    return matriz.applyfunc(lambda x: simplify(x))
+    """Formatea los números eliminando decimales innecesarios y mostrando fracciones y letras simplificadas."""
+    return matriz.applyfunc(lambda x: simplify(x))  # Simplifica las expresiones
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
@@ -166,7 +166,7 @@ def main():
                 st.subheader("✅ Resultado")
                 st.dataframe(matriz_a_dataframe(resultado))
             else:
-                st.error("No se pudo realizar la operación.")
+                st.error("¡Error! Las matrices no son compatibles para esta operación.")
         except Exception as e:
             st.error(f"Error en el cálculo: {e}")
 
