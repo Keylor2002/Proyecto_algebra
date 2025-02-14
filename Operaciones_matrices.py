@@ -51,12 +51,12 @@ def realizar_operacion(A, B, operacion):
     else:
         return None
 
-    # Aplicar la simplificación de letras y coeficientes
+    # Simplificar y combinar coeficientes y letras
     return formatear_resultado(resultado)
 
 def formatear_resultado(matriz):
     """Formatea los números eliminando decimales innecesarios y mostrando fracciones y letras correctamente."""
-    return matriz.applyfunc(lambda x: x if x.is_number and x.denominator != 1 else simplify(x))
+    return matriz.applyfunc(lambda x: simplify(x))
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
