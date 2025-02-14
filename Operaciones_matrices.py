@@ -6,12 +6,12 @@ from fractions import Fraction
 def formato_numero(num, modo):
     """Formatea los números según el modo seleccionado."""
     try:
+        if isinstance(num, str):
+            return num  # Mantener las letras como están
         if modo == "Decimal":
             return f"{float(num):.1f}"
         elif modo == "Fracción":
             return str(Fraction(float(num)).limit_denominator())
-        elif modo == "Letras" and isinstance(num, str):
-            return num  # Mantener las letras como están
         elif modo == "Letras":
             return chr(65 + int(float(num)) % 26)  # Convertir números a letras tipo A, B, C...
     except ValueError:
@@ -38,6 +38,28 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
         matriz.append(fila)
     return np.array(matriz, dtype=object)
 
+def multiplicar_matrices(A, B):
+    """Multiplica dos matrices permitiendo el uso de letras en los cálculos."""
+    filas_A, cols_A = A.shape
+    filas_B, cols_B = B.shape
+    resultado = np.empty((filas_A, cols_B), dtype=object)
+    
+    for i in range(filas_A):
+        for j in range(cols_B):
+            suma = ""
+            for k in range(cols_A):
+                a_val = A[i, k]
+                b_val = B[k, j]
+                
+                if isinstance(a_val, str) or isinstance(b_val, str):
+                    termino = f"({a_val}*{b_val})"
+                else:
+                    termino = str(a_val * b_val)
+                
+                suma += f" + {termino}" if suma else termino
+            resultado[i, j] = suma
+    return resultado
+
 def mostrar_pasos(A, B, resultado, operacion, modo):
     """Genera una explicación detallada del paso a paso de la operación."""
     pasos = f"Explicación del cálculo de la {operacion} de matrices:\n\n"
@@ -48,8 +70,7 @@ def mostrar_pasos(A, B, resultado, operacion, modo):
             elif operacion == "Resta":
                 pasos += f"({formato_numero(A[i, j], modo)}) - ({formato_numero(B[i, j], modo)}) = {formato_numero(resultado[i, j], modo)}\n"
             elif operacion == "Multiplicación":
-                elementos = [f"({formato_numero(A[i, k], modo)} * {formato_numero(B[k, j], modo)})" for k in range(len(A[i]))]
-                pasos += " + ".join(elementos) + f" = {formato_numero(resultado[i, j], modo)}\n"
+                pasos += f"{resultado[i, j]}\n"
     return pasos
 
 def main():
@@ -80,7 +101,7 @@ def main():
                 resultado = A - B
                 pasos = mostrar_pasos(A, B, resultado, "Resta", modo_visualizacion)
             elif operacion == "Multiplicación" and A.shape[1] == B.shape[0]:
-                resultado = np.dot(A.astype(object), B.astype(object))
+                resultado = multiplicar_matrices(A, B)
                 pasos = mostrar_pasos(A, B, resultado, "Multiplicación", modo_visualizacion)
             else:
                 st.error("Dimensiones incorrectas para la operación.")
