@@ -67,31 +67,72 @@ def mostrar_explicacion_operacion(operacion):
         st.subheader("🟢 ¿Cómo se suma una matriz?")
         st.write("""
             Para sumar dos matrices, deben tener el mismo tamaño.
-            Se suman sus elementos posición por posición:
+            Se suman sus elementos posición por posición, como sigue:
 
-            \[
-            A + B = \begin{bmatrix} a_{11} + b_{11} & a_{12} + b_{12} \\ a_{21} + b_{21} & a_{22} + b_{22} \end{bmatrix}
-            \]
+            Matriz A:
+            ```
+            [ a11  a12 ]
+            [ a21  a22 ]
+            ```
+
+            Matriz B:
+            ```
+            [ b11  b12 ]
+            [ b21  b22 ]
+            ```
+
+            Resultado de A + B:
+            ```
+            [ a11 + b11  a12 + b12 ]
+            [ a21 + b21  a22 + b22 ]
+            ```
         """)
     elif operacion == "Resta":
         st.subheader("🔵 ¿Cómo se resta una matriz?")
         st.write("""
-            La resta funciona igual que la suma, pero restando cada elemento:
+            Para restar dos matrices, deben tener el mismo tamaño.
+            Se restan sus elementos posición por posición, como sigue:
 
-            \[
-            A - B = \begin{bmatrix} a_{11} - b_{11} & a_{12} - b_{12} \\ a_{21} - b_{21} & a_{22} - b_{22} \end{bmatrix}
-            \]
+            Matriz A:
+            ```
+            [ a11  a12 ]
+            [ a21  a22 ]
+            ```
+
+            Matriz B:
+            ```
+            [ b11  b12 ]
+            [ b21  b22 ]
+            ```
+
+            Resultado de A - B:
+            ```
+            [ a11 - b11  a12 - b12 ]
+            [ a21 - b21  a22 - b22 ]
+            ```
         """)
     elif operacion == "Multiplicación":
         st.subheader("🔴 ¿Cómo se multiplican matrices?")
         st.write("""
             Para multiplicar matrices, el número de **columnas de la primera matriz** debe ser igual al número de **filas de la segunda matriz**.
 
-            Cada elemento del resultado se obtiene multiplicando y sumando filas por columnas:
+            Matriz A:
+            ```
+            [ a11  a12 ]
+            [ a21  a22 ]
+            ```
 
-            \[
-            C_{ij} = A_{i1} B_{1j} + A_{i2} B_{2j} + ... + A_{in} B_{nj}
-            \]
+            Matriz B:
+            ```
+            [ b11  b12 ]
+            [ b21  b22 ]
+            ```
+
+            Resultado de A * B:
+            ```
+            [ (a11*b11 + a12*b21)  (a11*b12 + a12*b22) ]
+            [ (a21*b11 + a22*b21)  (a21*b12 + a22*b22) ]
+            ```
         """)
 
 # --- Main: Streamlit Web App ---
