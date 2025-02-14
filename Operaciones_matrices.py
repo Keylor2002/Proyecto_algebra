@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from sympy import symbols, Matrix, simplify, N
+from sympy import symbols, Matrix, simplify, N, sympify
 
 # --- Introducción sobre matrices ---
 def mostrar_introduccion():
@@ -18,7 +18,7 @@ def mostrar_introduccion():
         - **Suma y Resta**: Se realizan sumando/restando los elementos correspondientes de dos matrices del mismo tamaño.
         - **Multiplicación**: Se obtiene multiplicando filas de la primera matriz por columnas de la segunda.
 
-        A continuación, podrás realizar estas operaciones ingresando matrices con números o letras. 🚀
+        A continuación, podrás realizar estas operaciones ingresando matrices con números, fracciones o letras. 🚀
     """)
 
 # --- Funciones para manejar matrices ---
@@ -31,9 +31,9 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
         for j in range(columnas):
             valor = cols[j].text_input(f"({i+1},{j+1})", value="0", key=f"{matriz_nombre}_cell_{i}_{j}")
             try:
-                fila.append(float(valor) if valor.replace('.', '', 1).isdigit() else symbols(valor))
-            except ValueError:
-                fila.append(symbols(valor))
+                fila.append(sympify(valor))  # Permite números, fracciones y letras
+            except:
+                fila.append(symbols(valor))  # Si hay error, se asume como letra
         matriz.append(fila)
     return matriz
 
@@ -51,11 +51,11 @@ def realizar_operacion(A, B, operacion):
     else:
         return None
 
-    return truncar_numeros(resultado)
+    return formatear_resultado(resultado)
 
-def truncar_numeros(matriz):
-    """Formatea los números eliminando ceros innecesarios y limitando decimales."""
-    return matriz.applyfunc(lambda x: int(x) if x.is_number and x == int(x) else round(N(x, 1), 1))
+def formatear_resultado(matriz):
+    """Formatea los números eliminando decimales innecesarios y mostrando fracciones."""
+    return matriz.applyfunc(lambda x: x if x.is_number and x.denominator != 1 else simplify(x))
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
@@ -96,7 +96,7 @@ def mostrar_explicacion_operacion(operacion):
 
 # --- Main: Streamlit Web App ---
 def main():
-    st.title("🧮 Calculadora de Operaciones Matriciales con Letras")
+    st.title("🧮 Calculadora de Operaciones Matriciales con Letras y Fracciones")
 
     mostrar_introduccion()  # Mostrar explicación inicial
 
