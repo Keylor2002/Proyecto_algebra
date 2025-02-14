@@ -33,6 +33,20 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
         matriz.append(fila)
     return np.array(matriz)
 
+def mostrar_pasos(A, B, resultado, operacion):
+    """Genera una explicación detallada del paso a paso de la operación."""
+    pasos = f"Explicación del cálculo de la {operacion} de matrices:\n\n"
+    for i in range(A.shape[0]):
+        for j in range(A.shape[1]):
+            if operacion == "Suma":
+                pasos += f"({A[i, j]}) + ({B[i, j]}) = {resultado[i, j]}\n"
+            elif operacion == "Resta":
+                pasos += f"({A[i, j]}) - ({B[i, j]}) = {resultado[i, j]}\n"
+            elif operacion == "Multiplicación":
+                elementos = [f"({A[i, k]} * {B[k, j]})" for k in range(A.shape[1])]
+                pasos += " + ".join(elementos) + f" = {resultado[i, j]}\n"
+    return pasos
+
 def main():
     st.title("Calculadora de Operaciones Matriciales")
     operacion = st.selectbox("Selecciona una operación", ["Suma", "Resta", "Multiplicación"])
@@ -55,16 +69,22 @@ def main():
     if st.button("Calcular"):
         if operacion == "Suma" and A.shape == B.shape:
             resultado = A + B
+            pasos = mostrar_pasos(A, B, resultado, "Suma")
         elif operacion == "Resta" and A.shape == B.shape:
             resultado = A - B
+            pasos = mostrar_pasos(A, B, resultado, "Resta")
         elif operacion == "Multiplicación" and A.shape[1] == B.shape[0]:
             resultado = np.dot(A, B)
+            pasos = mostrar_pasos(A, B, resultado, "Multiplicación")
         else:
             st.error("Dimensiones incorrectas para la operación.")
             return
         
         st.subheader("Resultado")
         st.dataframe(matriz_a_dataframe(resultado, modo_visualizacion).style.applymap(lambda x: "background-color: #a0c4ff;"))
+        
+        st.subheader("Explicación Paso a Paso")
+        st.text(pasos)
 
 if __name__ == "__main__":
     main()
