@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from sympy import symbols, Matrix, simplify, N, sympify
+from sympy import symbols, Matrix, simplify, sympify, collect
 
 # --- Introducción sobre matrices ---
 def mostrar_introduccion():
@@ -31,9 +31,9 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
         for j in range(columnas):
             valor = cols[j].text_input(f"({i+1},{j+1})", value="0", key=f"{matriz_nombre}_cell_{i}_{j}")
             try:
-                fila.append(sympify(valor))  # Permite números, fracciones y letras
+                fila.append(sympify(valor))  # Convierte a expresión simbólica
             except:
-                fila.append(symbols(valor))  # Si hay error, se asume como letra
+                fila.append(symbols(valor))  # Si hay error, se asume como variable
         matriz.append(fila)
     return matriz
 
@@ -51,11 +51,12 @@ def realizar_operacion(A, B, operacion):
     else:
         return None
 
+    # Aplicar simplificación y combinar términos similares
     return formatear_resultado(resultado)
 
 def formatear_resultado(matriz):
-    """Formatea los números eliminando decimales innecesarios y mostrando fracciones."""
-    return matriz.applyfunc(lambda x: x if x.is_number and x.denominator != 1 else simplify(x))
+    """Formatea los números eliminando decimales innecesarios y mostrando fracciones y letras correctamente."""
+    return matriz.applyfunc(lambda x: collect(simplify(x), symbols("abcdefghijklmnopqrstuvwxyz")))
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
