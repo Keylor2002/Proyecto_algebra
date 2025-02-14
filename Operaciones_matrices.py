@@ -18,14 +18,14 @@ def matriz_a_dataframe(matriz, modo):
     df = pd.DataFrame(matriz)
     return df.applymap(lambda x: formato_numero(x, modo))
 
-def ingresar_matriz(filas, columnas):
+def ingresar_matriz(filas, columnas, matriz_nombre):
     """Crea una interfaz de ingreso de datos en formato matricial."""
     matriz = []
     for i in range(filas):
         fila = []
         cols = st.columns(columnas)
         for j in range(columnas):
-            valor = cols[j].text_input(f"({i+1},{j+1})", value="0", key=f"cell_{i}_{j}")
+            valor = cols[j].text_input(f"({i+1},{j+1})", value="0", key=f"{matriz_nombre}_cell_{i}_{j}")
             try:
                 fila.append(float(valor))
             except ValueError:
@@ -42,15 +42,15 @@ def main():
     columnas = st.number_input("Número de columnas de la primera matriz", min_value=1, step=1, value=2)
     
     st.subheader("Matriz A")
-    A = ingresar_matriz(filas, columnas)
+    A = ingresar_matriz(filas, columnas, "A")
     
     if operacion in ["Suma", "Resta"]:
         st.subheader("Matriz B (mismo tamaño que A)")
-        B = ingresar_matriz(filas, columnas)
+        B = ingresar_matriz(filas, columnas, "B")
     else:
         columnas_B = st.number_input("Número de columnas de la segunda matriz", min_value=1, step=1, value=2)
         st.subheader("Matriz B")
-        B = ingresar_matriz(columnas, columnas_B)
+        B = ingresar_matriz(columnas, columnas_B, "B")
     
     if st.button("Calcular"):
         if operacion == "Suma" and A.shape == B.shape:
