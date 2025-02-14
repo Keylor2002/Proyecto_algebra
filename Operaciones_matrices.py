@@ -54,28 +54,25 @@ def realizar_operacion(A, B, operacion):
     return formatear_resultado(resultado)
 
 def formatear_resultado(matriz):
-    """Formatea los números eliminando decimales innecesarios y combinando términos algebraicos como 2a + 2a -> 4a."""
-    matriz_simplificada = matriz.applyfunc(lambda x: simplify(x))
-
-    # Para combinaciones de términos como 2a + 2a -> 4a
+    """Combina los coeficientes y simplifica expresiones como 2a + 2a = 4a."""
     def combinar_coeficientes(expr):
-        if expr.is_Mul:
-            terms = expr.as_ordered_factors()
-            coef = 1
-            variables = []
+        if expr.is_Add:
+            # Si la expresión es una suma, buscamos los coeficientes
+            terms = expr.as_ordered_terms()
+            coef_dict = {}
             for term in terms:
-                if term.is_number:
-                    coef *= term
+                if term.has(symbols('a')):  # Si tiene la variable 'a'
+                    coef = term.coeff(symbols('a'))
+                    coef_dict[symbols('a')] = coef_dict.get(symbols('a'), 0) + coef
                 else:
-                    variables.append(term)
-            if len(variables) == 1:  # Si hay solo una variable
-                return coef * variables[0]
-            else:
-                return expr  # Si no es una multiplicación simple
+                    coef_dict[term] = coef_dict.get(term, 0) + 1
+
+            # Devuelve el nuevo término con los coeficientes combinados
+            return sum([coef * var if var != 1 else coef for var, coef in coef_dict.items()])
         return expr
 
-    # Aplicamos la combinación de coeficientes
-    return matriz_simplificada.applyfunc(lambda x: combinar_coeficientes(x))
+    # Aplicamos la combinación de coeficientes a todo el resultado
+    return matriz.applyfunc(lambda x: combinar_coeficientes(x))
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
