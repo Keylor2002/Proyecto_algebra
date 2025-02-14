@@ -51,12 +51,11 @@ def realizar_operacion(A, B, operacion):
     else:
         return None
 
-    # Simplificar y combinar coeficientes y letras
     return formatear_resultado(resultado)
 
 def formatear_resultado(matriz):
-    """Formatea los números eliminando decimales innecesarios y mostrando fracciones y letras correctamente."""
-    return matriz.applyfunc(lambda x: simplify(x))
+    """Formatea los números eliminando decimales innecesarios y mostrando fracciones."""
+    return matriz.applyfunc(lambda x: x if x.is_number and x.denominator != 1 else simplify(x))
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
@@ -68,48 +67,72 @@ def mostrar_explicacion_operacion(operacion):
         st.subheader("🟢 ¿Cómo se suma una matriz?")
         st.write("""
             Para sumar dos matrices, deben tener el mismo tamaño.
-            Se suman sus elementos posición por posición:
-            
-            Ejemplo:
-            Si tienes:
-            A = \(\begin{bmatrix} 2b & 3b \\ 4b & 5b \end{bmatrix}\)
-            y
-            B = \(\begin{bmatrix} 3b & 4b \\ 1b & 2b \end{bmatrix}\)
+            Se suman sus elementos posición por posición, como sigue:
 
-            La suma sería:
-            \( A + B = \begin{bmatrix} 5b & 7b \\ 5b & 7b \end{bmatrix} \)
+            Matriz A:
+            ```
+            [ a11  a12 ]
+            [ a21  a22 ]
+            ```
+
+            Matriz B:
+            ```
+            [ b11  b12 ]
+            [ b21  b22 ]
+            ```
+
+            Resultado de A + B:
+            ```
+            [ a11 + b11  a12 + b12 ]
+            [ a21 + b21  a22 + b22 ]
+            ```
         """)
     elif operacion == "Resta":
         st.subheader("🔵 ¿Cómo se resta una matriz?")
         st.write("""
-            La resta funciona igual que la suma, pero restando cada elemento:
+            Para restar dos matrices, deben tener el mismo tamaño.
+            Se restan sus elementos posición por posición, como sigue:
 
-            Ejemplo:
-            Si tienes:
-            A = \(\begin{bmatrix} 2b & 3b \\ 4b & 5b \end{bmatrix}\)
-            y
-            B = \(\begin{bmatrix} 3b & 4b \\ 1b & 2b \end{bmatrix}\)
+            Matriz A:
+            ```
+            [ a11  a12 ]
+            [ a21  a22 ]
+            ```
 
-            La resta sería:
-            \( A - B = \begin{bmatrix} -b & -b \\ 3b & 3b \end{bmatrix} \)
+            Matriz B:
+            ```
+            [ b11  b12 ]
+            [ b21  b22 ]
+            ```
+
+            Resultado de A - B:
+            ```
+            [ a11 - b11  a12 - b12 ]
+            [ a21 - b21  a22 - b22 ]
+            ```
         """)
     elif operacion == "Multiplicación":
         st.subheader("🔴 ¿Cómo se multiplican matrices?")
         st.write("""
             Para multiplicar matrices, el número de **columnas de la primera matriz** debe ser igual al número de **filas de la segunda matriz**.
 
-            Cada elemento del resultado se obtiene multiplicando y sumando filas por columnas:
+            Matriz A:
+            ```
+            [ a11  a12 ]
+            [ a21  a22 ]
+            ```
 
-            Ejemplo:
-            Si tienes:
-            A = \(\begin{bmatrix} 2b & 3b \\ 4b & 5b \end{bmatrix}\)
-            y
-            B = \(\begin{bmatrix} 3b & 4b \\ 1b & 2b \end{bmatrix}\)
+            Matriz B:
+            ```
+            [ b11  b12 ]
+            [ b21  b22 ]
+            ```
 
-            La multiplicación sería:
-            \( A \times B = \begin{bmatrix} 9b^2 + 3b^2 & 12b^2 + 6b^2 \\ 12b^2 + 15b^2 & 16b^2 + 10b^2 \end{bmatrix} \)
-            Simplificado:
-            \( A \times B = \begin{bmatrix} 12b^2 & 18b^2 \\ 27b^2 & 26b^2 \end{bmatrix} \)
+            Resultado de A * B:
+            ```
+            [ (a11*b11 + a12*b21)  (a11*b12 + a12*b22) ]
+            [ (a21*b11 + a22*b21)  (a21*b12 + a22*b22) ]
+            ```
         """)
 
 # --- Main: Streamlit Web App ---
