@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from fractions import Fraction
+from sympy import symbols, simplify
 
 def formato_numero(num, modo):
     """Formatea los números según el modo seleccionado."""
@@ -9,11 +9,11 @@ def formato_numero(num, modo):
         if isinstance(num, str):
             return num  # Mantener las letras como están
         if modo == "Decimal":
-            return f"{float(num):.1f}"
+            return f"{int(num)}" if num.is_integer() else f"{num:.1f}"
         elif modo == "Fracción":
-            return str(Fraction(float(num)).limit_denominator())
+            return str(Fraction(num).limit_denominator())
         elif modo == "Letras":
-            return chr(65 + int(float(num)) % 26)  # Convertir números a letras tipo A, B, C...
+            return chr(65 + int(num) % 26)  # Convertir números a letras tipo A, B, C...
     except ValueError:
         return str(num)
     return str(num)
@@ -32,35 +32,22 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
         for j in range(columnas):
             valor = cols[j].text_input(f"({i+1},{j+1})", value="0", key=f"{matriz_nombre}_cell_{i}_{j}")
             try:
-                fila.append(float(valor) if valor.replace('.', '', 1).isdigit() else valor)
+                fila.append(float(valor) if valor.replace('.', '', 1).isdigit() else symbols(valor))
             except ValueError:
-                fila.append(valor)
+                fila.append(symbols(valor))
         matriz.append(fila)
     return np.array(matriz, dtype=object)
 
 def multiplicar_matrices(A, B):
-    """Multiplica dos matrices permitiendo el uso de letras en los cálculos."""
+    """Multiplica dos matrices permitiendo la simplificación de expresiones algebraicas."""
     filas_A, cols_A = A.shape
     filas_B, cols_B = B.shape
     resultado = np.empty((filas_A, cols_B), dtype=object)
     
     for i in range(filas_A):
         for j in range(cols_B):
-            suma = 0
-            explicacion = ""
-            for k in range(cols_A):
-                a_val = A[i, k]
-                b_val = B[k, j]
-                
-                if isinstance(a_val, str) or isinstance(b_val, str):
-                    termino = f"({a_val}*{b_val})"
-                else:
-                    termino = a_val * b_val
-                    suma += termino
-                
-                explicacion += f" + {termino}" if explicacion else str(termino)
-            
-            resultado[i, j] = suma if isinstance(suma, (int, float)) else explicacion
+            expresion = sum(A[i, k] * B[k, j] for k in range(cols_A))
+            resultado[i, j] = simplify(expresion)
     return resultado
 
 def mostrar_pasos(A, B, resultado, operacion, modo):
@@ -69,11 +56,11 @@ def mostrar_pasos(A, B, resultado, operacion, modo):
     for i in range(len(resultado)):
         for j in range(len(resultado[i])):
             if operacion == "Suma":
-                pasos += f"({formato_numero(A[i, j], modo)}) + ({formato_numero(B[i, j], modo)}) = {formato_numero(resultado[i, j], modo)}\n"
+                pasos += f"({A[i, j]}) + ({B[i, j]}) = {resultado[i, j]}\n"
             elif operacion == "Resta":
-                pasos += f"({formato_numero(A[i, j], modo)}) - ({formato_numero(B[i, j], modo)}) = {formato_numero(resultado[i, j], modo)}\n"
+                pasos += f"({A[i, j]}) - ({B[i, j]}) = {resultado[i, j]}\n"
             elif operacion == "Multiplicación":
-                pasos += f"Elemento ({i+1},{j+1}): {resultado[i, j]}\n"
+                pasos += f"Entrada ({i+1},{j+1}): {resultado[i, j]}\n"
     return pasos
 
 def main():
