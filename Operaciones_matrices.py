@@ -46,7 +46,8 @@ def multiplicar_matrices(A, B):
     
     for i in range(filas_A):
         for j in range(cols_B):
-            suma = ""
+            suma = 0
+            explicacion = ""
             for k in range(cols_A):
                 a_val = A[i, k]
                 b_val = B[k, j]
@@ -54,10 +55,12 @@ def multiplicar_matrices(A, B):
                 if isinstance(a_val, str) or isinstance(b_val, str):
                     termino = f"({a_val}*{b_val})"
                 else:
-                    termino = str(a_val * b_val)
+                    termino = a_val * b_val
+                    suma += termino
                 
-                suma += f" + {termino}" if suma else termino
-            resultado[i, j] = suma
+                explicacion += f" + {termino}" if explicacion else str(termino)
+            
+            resultado[i, j] = suma if isinstance(suma, (int, float)) else explicacion
     return resultado
 
 def mostrar_pasos(A, B, resultado, operacion, modo):
@@ -70,7 +73,7 @@ def mostrar_pasos(A, B, resultado, operacion, modo):
             elif operacion == "Resta":
                 pasos += f"({formato_numero(A[i, j], modo)}) - ({formato_numero(B[i, j], modo)}) = {formato_numero(resultado[i, j], modo)}\n"
             elif operacion == "Multiplicación":
-                pasos += f"{resultado[i, j]}\n"
+                pasos += f"Elemento ({i+1},{j+1}): {resultado[i, j]}\n"
     return pasos
 
 def main():
