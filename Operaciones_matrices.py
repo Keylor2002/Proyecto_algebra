@@ -3,7 +3,26 @@ import numpy as np
 import pandas as pd
 from sympy import symbols, simplify
 
-# Función para ingresar las matrices
+def formato_numero(num, modo):
+    """Formatea los números según el modo seleccionado."""
+    try:
+        if isinstance(num, str):
+            return num  # Mantener las letras como están
+        if modo == "Decimal":
+            return f"{int(num)}" if num.is_integer() else f"{num:.1f}"
+        elif modo == "Fracción":
+            return str(Fraction(num).limit_denominator())
+        elif modo == "Letras":
+            return chr(65 + int(num) % 26)  # Convertir números a letras tipo A, B, C...
+    except ValueError:
+        return str(num)
+    return str(num)
+
+def matriz_a_dataframe(matriz, modo):
+    """Convierte una matriz en un DataFrame para mostrar en Streamlit."""
+    df = pd.DataFrame(matriz)
+    return df.applymap(lambda x: formato_numero(x, modo))
+
 def ingresar_matriz(filas, columnas, matriz_nombre):
     """Crea una interfaz de ingreso de datos en formato matricial."""
     matriz = []
@@ -12,58 +31,27 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
         cols = st.columns(columnas)
         for j in range(columnas):
             valor = cols[j].text_input(f"({i+1},{j+1})", value="0", key=f"{matriz_nombre}_cell_{i}_{j}")
-            if valor.isalpha():  # Si es una letra, lo convertimos en símbolo
+            try:
+                fila.append(float(valor) if valor.replace('.', '', 1).isdigit() else symbols(valor))
+            except ValueError:
                 fila.append(symbols(valor))
-            else:  # Si no es letra, tratamos como número
-                try:
-                    fila.append(float(valor))
-                except ValueError:
-                    fila.append(0)  # Si hay error en la conversión, asignamos 0
         matriz.append(fila)
     return np.array(matriz, dtype=object)
 
-# Función para sumar matrices
-def sumar_matrices(A, B):
-    """Suma dos matrices con símbolos algebraicos."""
-    filas_A, cols_A = A.shape
-    filas_B, cols_B = B.shape
-    resultado = np.empty((filas_A, cols_B), dtype=object)
-    
-    for i in range(filas_A):
-        for j in range(cols_B):
-            resultado[i, j] = simplify(A[i, j] + B[i, j])  # Suma las expresiones simbólicas
-    
-    return resultado
-
-# Función para restar matrices
-def restar_matrices(A, B):
-    """Resta dos matrices con símbolos algebraicos."""
-    filas_A, cols_A = A.shape
-    filas_B, cols_B = B.shape
-    resultado = np.empty((filas_A, cols_B), dtype=object)
-    
-    for i in range(filas_A):
-        for j in range(cols_B):
-            resultado[i, j] = simplify(A[i, j] - B[i, j])  # Resta las expresiones simbólicas
-    
-    return resultado
-
-# Función para multiplicar matrices
 def multiplicar_matrices(A, B):
-    """Multiplica dos matrices con símbolos algebraicos."""
+    """Multiplica dos matrices permitiendo la simplificación de expresiones algebraicas."""
     filas_A, cols_A = A.shape
     filas_B, cols_B = B.shape
     resultado = np.empty((filas_A, cols_B), dtype=object)
     
     for i in range(filas_A):
         for j in range(cols_B):
-            # Realiza la multiplicación de matrices (con símbolo)
-            resultado[i, j] = simplify(sum(A[i, k] * B[k, j] for k in range(cols_A)))
-    
+            expresion = sum(A[i, k] * B[k, j] for k in range(cols_A))
+            resultado[i, j] = simplify(expresion)
     return resultado
 
-# Función para mostrar los pasos de la operación
-def mostrar_pasos(A, B, resultado, operacion):
+def mostrar_pasos(A, B, resultado, operacion, modo):
+    """Genera una explicación detallada del paso a paso de la operación."""
     pasos = f"Explicación del cálculo de la {operacion} de matrices:\n\n"
     for i in range(len(resultado)):
         for j in range(len(resultado[i])):
@@ -75,16 +63,10 @@ def mostrar_pasos(A, B, resultado, operacion):
                 pasos += f"Entrada ({i+1},{j+1}): {resultado[i, j]}\n"
     return pasos
 
-# Función para convertir matriz a DataFrame para Streamlit
-def matriz_a_dataframe(matriz):
-    """Convierte la matriz en un DataFrame para mostrarla en Streamlit."""
-    df = pd.DataFrame(matriz)
-    return df
-
-# Función principal
 def main():
-    st.title("Calculadora de Operaciones Matriciales con Letras")
+    st.title("Calculadora de Operaciones Matriciales")
     operacion = st.selectbox("Selecciona una operación", ["Suma", "Resta", "Multiplicación"])
+    modo_visualizacion = st.radio("Modo de visualización de números:", ["Decimal", "Fracción", "Letras"], horizontal=True)
     
     filas = st.number_input("Número de filas de la primera matriz", min_value=1, step=1, value=2)
     columnas = st.number_input("Número de columnas de la primera matriz", min_value=1, step=1, value=2)
@@ -100,23 +82,31 @@ def main():
         st.subheader("Matriz B")
         B = ingresar_matriz(columnas, columnas_B, "B")
     
+    # Opcional: Representación de exponentes dinámicos
+    base = st.number_input("Ingrese la base (a):", value=2)
+    exponente = st.number_input("Ingrese el exponente (n):", value=2)
+
+    # Mostrar el exponente usando Markdown
+    st.markdown(f"El resultado de {base}^{exponente} es:")
+    st.markdown(rf"${base}^{{{exponente}}}$")
+
     if st.button("Calcular"):
         try:
             if operacion == "Suma" and A.shape == B.shape:
-                resultado = sumar_matrices(A, B)
-                pasos = mostrar_pasos(A, B, resultado, "Suma")
+                resultado = A + B
+                pasos = mostrar_pasos(A, B, resultado, "Suma", modo_visualizacion)
             elif operacion == "Resta" and A.shape == B.shape:
-                resultado = restar_matrices(A, B)
-                pasos = mostrar_pasos(A, B, resultado, "Resta")
+                resultado = A - B
+                pasos = mostrar_pasos(A, B, resultado, "Resta", modo_visualizacion)
             elif operacion == "Multiplicación" and A.shape[1] == B.shape[0]:
                 resultado = multiplicar_matrices(A, B)
-                pasos = mostrar_pasos(A, B, resultado, "Multiplicación")
+                pasos = mostrar_pasos(A, B, resultado, "Multiplicación", modo_visualizacion)
             else:
                 st.error("Dimensiones incorrectas para la operación.")
                 return
             
             st.subheader("Resultado")
-            st.dataframe(matriz_a_dataframe(resultado))
+            st.dataframe(matriz_a_dataframe(resultado, modo_visualizacion).style.applymap(lambda x: "background-color: #a0c4ff;"))
             
             st.subheader("Explicación Paso a Paso")
             st.text(pasos)
