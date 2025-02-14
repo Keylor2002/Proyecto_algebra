@@ -82,14 +82,6 @@ def main():
         st.subheader("Matriz B")
         B = ingresar_matriz(columnas, columnas_B, "B")
     
-    # Opcional: Representación de exponentes dinámicos
-    base = st.number_input("Ingrese la base (a):", value=2)
-    exponente = st.number_input("Ingrese el exponente (n):", value=2)
-
-    # Mostrar el exponente usando Markdown
-    st.markdown(f"El resultado de {base}^{exponente} es:")
-    st.markdown(rf"${base}^{{{exponente}}}$")
-
     if st.button("Calcular"):
         try:
             if operacion == "Suma" and A.shape == B.shape:
