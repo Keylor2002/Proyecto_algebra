@@ -18,21 +18,37 @@ def numero_a_letra_o_coeficiente(num, letra):
     else:
         return f"{num}{letra}"  # Si es mayor a 1, devuelve el coeficiente (2A, 3B, ...)
 
-# Formatear número o letra de acuerdo al modo
-def formato_numero(num, modo):
-    """Formatea los números según el modo seleccionado."""
-    try:
-        if isinstance(num, str):
-            return num  # Mantener las letras como están
-        if modo == "Decimal":
-            return f"{int(num)}" if num.is_integer() else f"{num:.1f}"
-        elif modo == "Fracción":
-            return str(num)  # Usar str directamente para simplificar
-        elif modo == "Letras":
-            return chr(int(num) + ord('A'))  # Convertir números a letras tipo A, B, C...
-    except ValueError:
-        return str(num)
-    return str(num)
+# Función para sumar matrices con letras
+def sumar_matrices_con_letras(A, B):
+    """Suma dos matrices con letras representadas como números, manteniendo coeficientes."""
+    filas_A, cols_A = A.shape
+    filas_B, cols_B = B.shape
+    resultado = np.empty((filas_A, cols_B), dtype=object)
+    
+    for i in range(filas_A):
+        for j in range(cols_B):
+            # Sumar coeficientes de las letras
+            coeficiente = letra_a_numero(str(A[i, j])) + letra_a_numero(str(B[i, j]))
+            letra_resultado = chr(ord('A') + (coeficiente % 26))  # Asigna una letra basada en el coeficiente
+            resultado[i, j] = numero_a_letra_o_coeficiente(coeficiente, letra_resultado)
+    
+    return resultado
+
+# Función para restar matrices con letras
+def restar_matrices_con_letras(A, B):
+    """Resta dos matrices con letras representadas como números, manteniendo coeficientes."""
+    filas_A, cols_A = A.shape
+    filas_B, cols_B = B.shape
+    resultado = np.empty((filas_A, cols_B), dtype=object)
+    
+    for i in range(filas_A):
+        for j in range(cols_B):
+            # Restar coeficientes de las letras
+            coeficiente = letra_a_numero(str(A[i, j])) - letra_a_numero(str(B[i, j]))
+            letra_resultado = chr(ord('A') + (coeficiente % 26))  # Asigna una letra basada en el coeficiente
+            resultado[i, j] = numero_a_letra_o_coeficiente(coeficiente, letra_resultado)
+    
+    return resultado
 
 # Función para multiplicar matrices con letras
 def multiplicar_matrices_con_letras(A, B):
@@ -43,7 +59,7 @@ def multiplicar_matrices_con_letras(A, B):
     
     for i in range(filas_A):
         for j in range(cols_B):
-            # Suma de multiplicaciones y uso de coeficientes
+            # Multiplicar coeficientes de las letras
             coeficiente = sum(letra_a_numero(str(A[i, k])) * letra_a_numero(str(B[k, j])) for k in range(cols_A))
             letra_resultado = chr(ord('A') + (coeficiente % 26))  # Asigna una letra basada en el coeficiente
             resultado[i, j] = numero_a_letra_o_coeficiente(coeficiente, letra_resultado)
@@ -102,10 +118,10 @@ def main():
     if st.button("Calcular"):
         try:
             if operacion == "Suma" and A.shape == B.shape:
-                resultado = A + B
+                resultado = sumar_matrices_con_letras(A, B)
                 pasos = mostrar_pasos(A, B, resultado, "Suma", modo_visualizacion)
             elif operacion == "Resta" and A.shape == B.shape:
-                resultado = A - B
+                resultado = restar_matrices_con_letras(A, B)
                 pasos = mostrar_pasos(A, B, resultado, "Resta", modo_visualizacion)
             elif operacion == "Multiplicación" and A.shape[1] == B.shape[0]:
                 resultado = multiplicar_matrices_con_letras(A, B)
