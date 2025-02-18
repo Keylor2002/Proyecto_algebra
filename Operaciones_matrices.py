@@ -16,7 +16,8 @@ def mostrar_introduccion():
 
         ### 🔹 Operaciones principales:
         - **Suma y Resta**: Se realizan sumando/restando los elementos correspondientes de dos matrices del mismo tamaño.
-        - **Multiplicación**: Se obtiene multiplicando filas de la primera matriz por columnas de la segunda.
+        - **Multiplicación**: Se obtiene multiplicando filas de la primera matriz por columnas de la segunda, asegurando 
+            que el número de columnas de la primera matriz sea igual al número de filas de la segunda matriz.
 
         A continuación, podrás realizar estas operaciones ingresando matrices con números, fracciones o letras. 🚀
     """)
