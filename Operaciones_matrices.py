@@ -38,7 +38,7 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
     return matriz
 
 def realizar_operacion(A, B, operacion):
-    """Realiza la operación seleccionada sobre las matrices A y B y guarda los pasos."""
+    """Realiza la operación seleccionada sobre las matrices A y B y muestra los pasos intermedios."""
     matriz_A = Matrix(A)
     matriz_B = Matrix(B)
     pasos = []
@@ -46,62 +46,46 @@ def realizar_operacion(A, B, operacion):
     if operacion == "Suma":
         resultado = matriz_A + matriz_B
         for i in range(matriz_A.rows):
-            fila_paso = []
+            fila_pasos = []
             for j in range(matriz_A.cols):
-                fila_paso.append(f"{matriz_A[i, j]} + {matriz_B[i, j]}")
-            pasos.append(fila_paso)
+                fila_pasos.append(f"{matriz_A[i, j]} + {matriz_B[i, j]}")
+            pasos.append(fila_pasos)
     elif operacion == "Resta":
         resultado = matriz_A - matriz_B
         for i in range(matriz_A.rows):
-            fila_paso = []
+            fila_pasos = []
             for j in range(matriz_A.cols):
-                fila_paso.append(f"{matriz_A[i, j]} - {matriz_B[i, j]}")
-            pasos.append(fila_paso)
+                fila_pasos.append(f"{matriz_A[i, j]} - {matriz_B[i, j]}")
+            pasos.append(fila_pasos)
     elif operacion == "Multiplicación":
         resultado = matriz_A * matriz_B
         for i in range(matriz_A.rows):
-            fila_paso = []
+            fila_pasos = []
             for j in range(matriz_B.cols):
-                suma_productos = " + ".join([f"({matriz_A[i, k]} * {matriz_B[k, j]})" for k in range(matriz_A.cols)])
-                fila_paso.append(suma_productos)
-            pasos.append(fila_paso)
+                multiplicaciones = [f"({matriz_A[i, k]} * {matriz_B[k, j]})" for k in range(matriz_A.cols)]
+                fila_pasos.append(" + ".join(multiplicaciones))
+            pasos.append(fila_pasos)
     else:
         return None, None
 
     return pasos, resultado
 
 def matriz_a_dataframe(matriz):
-    """Convierte una matriz en DataFrame para mostrar en Streamlit."""
+    """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
     return pd.DataFrame(matriz.tolist())
 
-def mostrar_explicacion_operacion(operacion):
-    if operacion == "Suma":
-        st.subheader("🟢 ¿Cómo se suma una matriz?")
-        st.write("""
-            Para sumar dos matrices, deben tener el mismo tamaño.
-            Se suman sus elementos posición por posición.
-        """)
-    elif operacion == "Resta":
-        st.subheader("🔵 ¿Cómo se resta una matriz?")
-        st.write("""
-            Para restar dos matrices, deben tener el mismo tamaño.
-            Se restan sus elementos posición por posición.
-        """)
-    elif operacion == "Multiplicación":
-        st.subheader("🔴 ¿Cómo se multiplican matrices?")
-        st.write("""
-            Para multiplicar matrices, el número de **columnas de la primera matriz** debe ser igual al número de **filas de la segunda matriz**.
-        """)
+def matriz_pasos_a_dataframe(matriz):
+    """Convierte una matriz de pasos intermedios en DataFrame para mostrar en Streamlit."""
+    return pd.DataFrame(matriz)
 
 # --- Main: Streamlit Web App ---
 def main():
     st.title("🧮 Calculadora de Operaciones Matriciales con Letras y Fracciones")
-    
-    mostrar_introduccion()
-    
+
+    mostrar_introduccion()  # Mostrar explicación inicial
+
     operacion = st.selectbox("Selecciona una operación", ["Suma", "Resta", "Multiplicación"])
-    mostrar_explicacion_operacion(operacion)
-    
+
     filas = st.number_input("Número de filas de la primera matriz", min_value=1, step=1, value=2)
     columnas = st.number_input("Número de columnas de la primera matriz", min_value=1, step=1, value=2)
     
@@ -120,8 +104,8 @@ def main():
         try:
             pasos, resultado = realizar_operacion(A, B, operacion)
             if resultado is not None:
-                st.subheader("📌 Pasos de la Operación")
-                st.dataframe(pd.DataFrame(pasos))
+                st.subheader("📝 Pasos de la Operación")
+                st.dataframe(matriz_pasos_a_dataframe(pasos))
                 
                 st.subheader("✅ Resultado Final")
                 st.dataframe(matriz_a_dataframe(resultado))
