@@ -38,27 +38,20 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
     return matriz
 
 def realizar_operacion(A, B, operacion):
-    """Realiza la operación seleccionada sobre las matrices A y B y devuelve el paso a paso."""
+    """Realiza la operación seleccionada sobre las matrices A y B."""
     matriz_A = Matrix(A)
     matriz_B = Matrix(B)
-    pasos = []  # Para almacenar los pasos
-
+    
     if operacion == "Suma":
-        pasos.append(f"Paso 1: Sumar los elementos correspondientes de las matrices A y B.")
         resultado = matriz_A + matriz_B
     elif operacion == "Resta":
-        pasos.append(f"Paso 1: Restar los elementos correspondientes de las matrices A y B.")
         resultado = matriz_A - matriz_B
     elif operacion == "Multiplicación":
-        pasos.append(f"Paso 1: Multiplicar las filas de la matriz A por las columnas de la matriz B.")
         resultado = matriz_A * matriz_B
     else:
-        return None, pasos
+        return None
 
-    # Agregar los pasos de la operación (simplificación si corresponde)
-    pasos.append(f"Paso 2: Mostrar el resultado de la operación: {resultado}")
-    
-    return formatear_resultado(resultado), pasos
+    return formatear_resultado(resultado)
 
 def formatear_resultado(matriz):
     """Combina los coeficientes y simplifica expresiones como 2a + 2a = 4a."""
@@ -83,11 +76,7 @@ def formatear_resultado(matriz):
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
-    # Asegurarse de que la matriz esté en formato SymPy
-    if isinstance(matriz, Matrix):
-        return pd.DataFrame(matriz.tolist())
-    else:
-        return pd.DataFrame(matriz)
+    return pd.DataFrame(matriz.tolist())
 
 # --- Explicaciones por operación ---
 def mostrar_explicacion_operacion(operacion):
@@ -98,20 +87,21 @@ def mostrar_explicacion_operacion(operacion):
             Se suman sus elementos posición por posición, como sigue:
 
             Matriz A:
-            
-[ a11  a12 ]
+            [ a11  a12 ]
             [ a21  a22 ]
-            
-            Matriz B:
-            
-[ b11  b12 ]
+
+
+            Matriz B: 
+            [ b11  b12 ]
             [ b21  b22 ]
-            
+
+
             Resultado de A + B:
-            
-[ a11 + b11  a12 + b12 ]
+            [ a11 + b11  a12 + b12 ]
             [ a21 + b21  a22 + b22 ]
-        """)
+            
+            """)
+        
     elif operacion == "Resta":
         st.subheader("🔵 ¿Cómo se resta una matriz?")
         st.write("""
@@ -122,16 +112,19 @@ def mostrar_explicacion_operacion(operacion):
             
 [ a11  a12 ]
             [ a21  a22 ]
-            
+
+
             Matriz B:
             
 [ b11  b12 ]
             [ b21  b22 ]
-            
+
+
             Resultado de A - B:
             
 [ a11 - b11  a12 - b12 ]
             [ a21 - b21  a22 - b22 ]
+
         """)
     elif operacion == "Multiplicación":
         st.subheader("🔴 ¿Cómo se multiplican matrices?")
@@ -142,16 +135,19 @@ def mostrar_explicacion_operacion(operacion):
             
 [ a11  a12 ]
             [ a21  a22 ]
-            
+
+
             Matriz B:
             
 [ b11  b12 ]
             [ b21  b22 ]
-            
+
+
             Resultado de A * B:
             
 [ (a11*b11 + a12*b21)  (a11*b12 + a12*b22) ]
             [ (a21*b11 + a22*b21)  (a21*b12 + a22*b22) ]
+
         """)
 
 # --- Main: Streamlit Web App ---
@@ -180,32 +176,10 @@ def main():
     
     if st.button("Calcular"):
         try:
-            resultado, pasos = realizar_operacion(A, B, operacion)
+            resultado = realizar_operacion(A, B, operacion)
             if resultado is not None:
-                st.subheader("🔍 Paso a paso")
-
-                for paso in pasos:
-                    if "Resultado" in paso:
-                        st.write(f"**{paso}**")
-                        st.dataframe(matriz_a_dataframe(resultado))
-                    else:
-                        st.write(f"{paso}:")
-
-                        if operacion == "Suma":
-                            st.write(f"Matriz A:")
-                            st.dataframe(matriz_a_dataframe(A))
-                            st.write(f"Matriz B:")
-                            st.dataframe(matriz_a_dataframe(B))
-                        elif operacion == "Resta":
-                            st.write(f"Matriz A:")
-                            st.dataframe(matriz_a_dataframe(A))
-                            st.write(f"Matriz B:")
-                            st.dataframe(matriz_a_dataframe(B))
-                        elif operacion == "Multiplicación":
-                            st.write(f"Matriz A:")
-                            st.dataframe(matriz_a_dataframe(A))
-                            st.write(f"Matriz B:")
-                            st.dataframe(matriz_a_dataframe(B))
+                st.subheader("✅ Resultado")
+                st.dataframe(matriz_a_dataframe(resultado))
             else:
                 st.error("¡Error! Las matrices no son compatibles para esta operación.")
         except Exception as e:
