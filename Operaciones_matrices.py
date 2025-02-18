@@ -37,21 +37,38 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
         matriz.append(fila)
     return matriz
 
-def realizar_operacion(A, B, operacion):
-    """Realiza la operación seleccionada sobre las matrices A y B."""
+def capturar_pasos(A, B, operacion):
+    """Captura los pasos intermedios de la operación matricial."""
+    pasos = []
     matriz_A = Matrix(A)
     matriz_B = Matrix(B)
-    
+
+    pasos.append(f"**Paso 1:** Matriz A ingresada:")
+    pasos.append(matriz_a_dataframe(matriz_A).to_markdown())
+
+    pasos.append(f"**Paso 2:** Matriz B ingresada:")
+    pasos.append(matriz_a_dataframe(matriz_B).to_markdown())
+
     if operacion == "Suma":
+        pasos.append("**Paso 3:** Sumando las matrices A y B:")
         resultado = matriz_A + matriz_B
     elif operacion == "Resta":
+        pasos.append("**Paso 4:** Restando la matriz B de la matriz A:")
         resultado = matriz_A - matriz_B
     elif operacion == "Multiplicación":
+        pasos.append("**Paso 5:** Multiplicando las matrices A y B:")
         resultado = matriz_A * matriz_B
     else:
-        return None
+        return None, pasos
 
-    return formatear_resultado(resultado)
+    pasos.append("**Paso 6:** Resultado final:")
+    pasos.append(matriz_a_dataframe(resultado).to_markdown())
+
+    return resultado, pasos
+
+def realizar_operacion(A, B, operacion):
+    """Realiza la operación seleccionada y captura los pasos."""
+    return capturar_pasos(A, B, operacion)
 
 def formatear_resultado(matriz):
     """Combina los coeficientes y simplifica expresiones como 2a + 2a = 4a."""
@@ -168,9 +185,13 @@ def main():
     
     if st.button("Calcular"):
         try:
-            resultado = realizar_operacion(A, B, operacion)
+            resultado, pasos = realizar_operacion(A, B, operacion)
             if resultado is not None:
-                st.subheader("✅ Resultado")
+                st.subheader("📝 Pasos realizados:")
+                for paso in pasos:
+                    st.markdown(paso, unsafe_allow_html=True)
+                
+                st.subheader("✅ Resultado final:")
                 st.dataframe(matriz_a_dataframe(resultado))
             else:
                 st.error("¡Error! Las matrices no son compatibles para esta operación.")
