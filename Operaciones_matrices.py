@@ -38,40 +38,52 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
     return matriz
 
 def realizar_operacion(A, B, operacion):
-    """Realiza la operación seleccionada sobre las matrices A y B y devuelve los pasos intermedios."""
+    """Realiza la operación seleccionada sobre las matrices A y B y devuelve el paso a paso."""
     matriz_A = Matrix(A)
     matriz_B = Matrix(B)
-    pasos = []
-    
+    pasos = []  # Para almacenar los pasos
+
     if operacion == "Suma":
+        pasos.append(f"Paso 1: Sumar los elementos correspondientes de las matrices A y B.")
         resultado = matriz_A + matriz_B
-        pasos.append(("Paso 1: Matriz A", matriz_A))
-        pasos.append(("Paso 2: Matriz B", matriz_B))
-        pasos.append(("Paso 3: A + B", resultado))
     elif operacion == "Resta":
+        pasos.append(f"Paso 1: Restar los elementos correspondientes de las matrices A y B.")
         resultado = matriz_A - matriz_B
-        pasos.append(("Paso 1: Matriz A", matriz_A))
-        pasos.append(("Paso 2: Matriz B", matriz_B))
-        pasos.append(("Paso 3: A - B", resultado))
     elif operacion == "Multiplicación":
+        pasos.append(f"Paso 1: Multiplicar las filas de la matriz A por las columnas de la matriz B.")
         resultado = matriz_A * matriz_B
-        pasos.append(("Paso 1: Matriz A", matriz_A))
-        pasos.append(("Paso 2: Matriz B", matriz_B))
-        pasos.append(("Paso 3: A * B", resultado))
     else:
-        return None, []
+        return None, pasos
+
+    # Agregar los pasos de la operación (simplificación si corresponde)
+    pasos.append(f"Paso 2: Mostrar el resultado de la operación: {resultado}")
     
-    return resultado, pasos
+    return formatear_resultado(resultado), pasos
+
+def formatear_resultado(matriz):
+    """Combina los coeficientes y simplifica expresiones como 2a + 2a = 4a."""
+    def combinar_coeficientes(expr):
+        if expr.is_Add:
+            # Si la expresión es una suma, buscamos los coeficientes
+            terms = expr.as_ordered_terms()
+            coef_dict = {}
+            for term in terms:
+                if term.has(symbols('a')):  # Si tiene la variable 'a'
+                    coef = term.coeff(symbols('a'))
+                    coef_dict[symbols('a')] = coef_dict.get(symbols('a'), 0) + coef
+                else:
+                    coef_dict[term] = coef_dict.get(term, 0) + 1
+
+            # Devuelve el nuevo término con los coeficientes combinados
+            return sum([coef * var if var != 1 else coef for var, coef in coef_dict.items()])
+        return expr
+
+    # Aplicamos la combinación de coeficientes a todo el resultado
+    return matriz.applyfunc(lambda x: combinar_coeficientes(x))
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
     return pd.DataFrame(matriz.tolist())
-
-def mostrar_pasos(pasos):
-    """Muestra los pasos intermedios de la operación en matrices."""
-    for descripcion, matriz in pasos:
-        st.subheader(descripcion)
-        st.dataframe(matriz_a_dataframe(matriz))
 
 # --- Explicaciones por operación ---
 def mostrar_explicacion_operacion(operacion):
@@ -80,17 +92,62 @@ def mostrar_explicacion_operacion(operacion):
         st.write("""
             Para sumar dos matrices, deben tener el mismo tamaño.
             Se suman sus elementos posición por posición, como sigue:
+
+            Matriz A:
+            
+[ a11  a12 ]
+            [ a21  a22 ]
+            
+            Matriz B:
+            
+[ b11  b12 ]
+            [ b21  b22 ]
+            
+            Resultado de A + B:
+            
+[ a11 + b11  a12 + b12 ]
+            [ a21 + b21  a22 + b22 ]
         """)
     elif operacion == "Resta":
         st.subheader("🔵 ¿Cómo se resta una matriz?")
         st.write("""
             Para restar dos matrices, deben tener el mismo tamaño.
-            Se restan sus elementos posición por posición.
+            Se restan sus elementos posición por posición, como sigue:
+
+            Matriz A:
+            
+[ a11  a12 ]
+            [ a21  a22 ]
+            
+            Matriz B:
+            
+[ b11  b12 ]
+            [ b21  b22 ]
+            
+            Resultado de A - B:
+            
+[ a11 - b11  a12 - b12 ]
+            [ a21 - b21  a22 - b22 ]
         """)
     elif operacion == "Multiplicación":
         st.subheader("🔴 ¿Cómo se multiplican matrices?")
         st.write("""
             Para multiplicar matrices, el número de **columnas de la primera matriz** debe ser igual al número de **filas de la segunda matriz**.
+
+            Matriz A:
+            
+[ a11  a12 ]
+            [ a21  a22 ]
+            
+            Matriz B:
+            
+[ b11  b12 ]
+            [ b21  b22 ]
+            
+            Resultado de A * B:
+            
+[ (a11*b11 + a12*b21)  (a11*b12 + a12*b22) ]
+            [ (a21*b11 + a22*b21)  (a21*b12 + a22*b22) ]
         """)
 
 # --- Main: Streamlit Web App ---
@@ -121,9 +178,12 @@ def main():
         try:
             resultado, pasos = realizar_operacion(A, B, operacion)
             if resultado is not None:
-                mostrar_pasos(pasos)
-                st.subheader("✅ Resultado Final")
+                st.subheader("✅ Resultado")
                 st.dataframe(matriz_a_dataframe(resultado))
+
+                st.subheader("🔍 Paso a paso")
+                for paso in pasos:
+                    st.write(paso)
             else:
                 st.error("¡Error! Las matrices no son compatibles para esta operación.")
         except Exception as e:
