@@ -178,12 +178,30 @@ def main():
         try:
             resultado, pasos = realizar_operacion(A, B, operacion)
             if resultado is not None:
-                st.subheader("✅ Resultado")
-                st.dataframe(matriz_a_dataframe(resultado))
-
                 st.subheader("🔍 Paso a paso")
+
                 for paso in pasos:
-                    st.write(paso)
+                    if "Resultado" in paso:
+                        st.write(f"**{paso}**")
+                        st.dataframe(matriz_a_dataframe(resultado))
+                    else:
+                        st.write(f"{paso}:")
+
+                        if operacion == "Suma":
+                            st.write(f"Matriz A:")
+                            st.dataframe(matriz_a_dataframe(A))
+                            st.write(f"Matriz B:")
+                            st.dataframe(matriz_a_dataframe(B))
+                        elif operacion == "Resta":
+                            st.write(f"Matriz A:")
+                            st.dataframe(matriz_a_dataframe(A))
+                            st.write(f"Matriz B:")
+                            st.dataframe(matriz_a_dataframe(B))
+                        elif operacion == "Multiplicación":
+                            st.write(f"Matriz A:")
+                            st.dataframe(matriz_a_dataframe(A))
+                            st.write(f"Matriz B:")
+                            st.dataframe(matriz_a_dataframe(B))
             else:
                 st.error("¡Error! Las matrices no son compatibles para esta operación.")
         except Exception as e:
