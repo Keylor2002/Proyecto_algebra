@@ -78,6 +78,42 @@ def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
     return pd.DataFrame(matriz.tolist())
 
+def mostrar_pasos(matriz_A, matriz_B, operacion):
+    """Muestra los pasos intermedios de la operación."""
+    st.subheader("🔄 Pasos realizados")
+    if operacion == "Suma":
+        st.write("### Paso 1: Sumar las matrices A y B")
+        # Muestra las matrices A y B
+        st.write("Matriz A:")
+        st.dataframe(matriz_a_dataframe(matriz_A))
+        st.write("Matriz B:")
+        st.dataframe(matriz_a_dataframe(matriz_B))
+        st.write("Resultado de A + B:")
+        resultado = matriz_A + matriz_B
+        st.dataframe(matriz_a_dataframe(resultado))
+        
+    elif operacion == "Resta":
+        st.write("### Paso 1: Restar las matrices A y B")
+        # Muestra las matrices A y B
+        st.write("Matriz A:")
+        st.dataframe(matriz_a_dataframe(matriz_A))
+        st.write("Matriz B:")
+        st.dataframe(matriz_a_dataframe(matriz_B))
+        st.write("Resultado de A - B:")
+        resultado = matriz_A - matriz_B
+        st.dataframe(matriz_a_dataframe(resultado))
+        
+    elif operacion == "Multiplicación":
+        st.write("### Paso 1: Multiplicar las matrices A y B")
+        # Muestra las matrices A y B
+        st.write("Matriz A:")
+        st.dataframe(matriz_a_dataframe(matriz_A))
+        st.write("Matriz B:")
+        st.dataframe(matriz_a_dataframe(matriz_B))
+        st.write("Resultado de A * B:")
+        resultado = matriz_A * matriz_B
+        st.dataframe(matriz_a_dataframe(resultado))
+
 # --- Explicaciones por operación ---
 def mostrar_explicacion_operacion(operacion):
     if operacion == "Suma":
@@ -121,7 +157,6 @@ def mostrar_explicacion_operacion(operacion):
             Resultado de A - B:
             [ a11 - b11  a12 - b12 ]
             [ a21 - b21  a22 - b22 ]
-
         """)
     elif operacion == "Multiplicación":
         st.subheader("🔴 ¿Cómo se multiplican matrices?")
@@ -139,10 +174,9 @@ def mostrar_explicacion_operacion(operacion):
             Resultado de A * B:
             [ (a11*b11 + a12*b21)  (a11*b12 + a12*b22) ]
             [ (a21*b11 + a22*b21)  (a21*b12 + a22*b22) ]
-
         """)
 
-# --- Main: Streamlit Web App ---
+# --- Main: Streamlit Web App --- 
 def main():
     st.title("🧮 Calculadora de Operaciones Matriciales con Letras y Fracciones")
 
@@ -168,9 +202,13 @@ def main():
     
     if st.button("Calcular"):
         try:
+            # Mostrar los pasos antes del resultado final
+            mostrar_pasos(Matrix(A), Matrix(B), operacion)
+            
+            # Realizar la operación final
             resultado = realizar_operacion(A, B, operacion)
             if resultado is not None:
-                st.subheader("✅ Resultado")
+                st.subheader("✅ Resultado Final")
                 st.dataframe(matriz_a_dataframe(resultado))
             else:
                 st.error("¡Error! Las matrices no son compatibles para esta operación.")
