@@ -38,130 +38,70 @@ def ingresar_matriz(filas, columnas, matriz_nombre):
     return matriz
 
 def realizar_operacion(A, B, operacion):
-    """Realiza la operación seleccionada sobre las matrices A y B."""
+    """Realiza la operación seleccionada sobre las matrices A y B y guarda los pasos."""
     matriz_A = Matrix(A)
     matriz_B = Matrix(B)
+    pasos = []
     
     if operacion == "Suma":
         resultado = matriz_A + matriz_B
+        for i in range(matriz_A.rows):
+            fila_paso = []
+            for j in range(matriz_A.cols):
+                fila_paso.append(f"{matriz_A[i, j]} + {matriz_B[i, j]}")
+            pasos.append(fila_paso)
     elif operacion == "Resta":
         resultado = matriz_A - matriz_B
+        for i in range(matriz_A.rows):
+            fila_paso = []
+            for j in range(matriz_A.cols):
+                fila_paso.append(f"{matriz_A[i, j]} - {matriz_B[i, j]}")
+            pasos.append(fila_paso)
     elif operacion == "Multiplicación":
         resultado = matriz_A * matriz_B
+        for i in range(matriz_A.rows):
+            fila_paso = []
+            for j in range(matriz_B.cols):
+                suma_productos = " + ".join([f"({matriz_A[i, k]} * {matriz_B[k, j]})" for k in range(matriz_A.cols)])
+                fila_paso.append(suma_productos)
+            pasos.append(fila_paso)
     else:
-        return None
+        return None, None
 
-    return formatear_resultado(resultado)
-
-def formatear_resultado(matriz):
-    """Combina los coeficientes y simplifica expresiones como 2a + 2a = 4a."""
-    def combinar_coeficientes(expr):
-        if expr.is_Add:
-            # Si la expresión es una suma, buscamos los coeficientes
-            terms = expr.as_ordered_terms()
-            coef_dict = {}
-            for term in terms:
-                if term.has(symbols('a')):  # Si tiene la variable 'a'
-                    coef = term.coeff(symbols('a'))
-                    coef_dict[symbols('a')] = coef_dict.get(symbols('a'), 0) + coef
-                else:
-                    coef_dict[term] = coef_dict.get(term, 0) + 1
-
-            # Devuelve el nuevo término con los coeficientes combinados
-            return sum([coef * var if var != 1 else coef for var, coef in coef_dict.items()])
-        return expr
-
-    # Aplicamos la combinación de coeficientes a todo el resultado
-    return matriz.applyfunc(lambda x: combinar_coeficientes(x))
+    return pasos, resultado
 
 def matriz_a_dataframe(matriz):
-    """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
+    """Convierte una matriz en DataFrame para mostrar en Streamlit."""
     return pd.DataFrame(matriz.tolist())
 
-# --- Explicaciones por operación ---
 def mostrar_explicacion_operacion(operacion):
     if operacion == "Suma":
         st.subheader("🟢 ¿Cómo se suma una matriz?")
         st.write("""
             Para sumar dos matrices, deben tener el mismo tamaño.
-            Se suman sus elementos posición por posición, como sigue:
-
-            Matriz A:
-            ```
-            [ a11  a12 ]
-            [ a21  a22 ]
-            ```
-
-            Matriz B:
-            ```
-            [ b11  b12 ]
-            [ b21  b22 ]
-            ```
-
-            Resultado de A + B:
-            ```
-            [ a11 + b11  a12 + b12 ]
-            [ a21 + b21  a22 + b22 ]
-            ```
+            Se suman sus elementos posición por posición.
         """)
     elif operacion == "Resta":
         st.subheader("🔵 ¿Cómo se resta una matriz?")
         st.write("""
             Para restar dos matrices, deben tener el mismo tamaño.
-            Se restan sus elementos posición por posición, como sigue:
-
-            Matriz A:
-            ```
-            [ a11  a12 ]
-            [ a21  a22 ]
-            ```
-
-            Matriz B:
-            ```
-            [ b11  b12 ]
-            [ b21  b22 ]
-            ```
-
-            Resultado de A - B:
-            ```
-            [ a11 - b11  a12 - b12 ]
-            [ a21 - b21  a22 - b22 ]
-            ```
+            Se restan sus elementos posición por posición.
         """)
     elif operacion == "Multiplicación":
         st.subheader("🔴 ¿Cómo se multiplican matrices?")
         st.write("""
             Para multiplicar matrices, el número de **columnas de la primera matriz** debe ser igual al número de **filas de la segunda matriz**.
-
-            Matriz A:
-            ```
-            [ a11  a12 ]
-            [ a21  a22 ]
-            ```
-
-            Matriz B:
-            ```
-            [ b11  b12 ]
-            [ b21  b22 ]
-            ```
-
-            Resultado de A * B:
-            ```
-            [ (a11*b11 + a12*b21)  (a11*b12 + a12*b22) ]
-            [ (a21*b11 + a22*b21)  (a21*b12 + a22*b22) ]
-            ```
         """)
 
 # --- Main: Streamlit Web App ---
 def main():
     st.title("🧮 Calculadora de Operaciones Matriciales con Letras y Fracciones")
-
-    mostrar_introduccion()  # Mostrar explicación inicial
-
+    
+    mostrar_introduccion()
+    
     operacion = st.selectbox("Selecciona una operación", ["Suma", "Resta", "Multiplicación"])
-
-    mostrar_explicacion_operacion(operacion)  # Mostrar explicación específica
-
+    mostrar_explicacion_operacion(operacion)
+    
     filas = st.number_input("Número de filas de la primera matriz", min_value=1, step=1, value=2)
     columnas = st.number_input("Número de columnas de la primera matriz", min_value=1, step=1, value=2)
     
@@ -178,9 +118,12 @@ def main():
     
     if st.button("Calcular"):
         try:
-            resultado = realizar_operacion(A, B, operacion)
+            pasos, resultado = realizar_operacion(A, B, operacion)
             if resultado is not None:
-                st.subheader("✅ Resultado")
+                st.subheader("📌 Pasos de la Operación")
+                st.dataframe(pd.DataFrame(pasos))
+                
+                st.subheader("✅ Resultado Final")
                 st.dataframe(matriz_a_dataframe(resultado))
             else:
                 st.error("¡Error! Las matrices no son compatibles para esta operación.")
