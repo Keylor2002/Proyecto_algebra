@@ -124,16 +124,19 @@ def mostrar_explicacion_operacion(operacion):
 
             Matriz A:
             [ a11  a12 ]
+            
             [ a21  a22 ]
 
 
             Matriz B: 
             [ b11  b12 ]
+            
             [ b21  b22 ]
 
 
             Resultado de A + B:
             [ a11 + b11  a12 + b12 ]
+            
             [ a21 + b21  a22 + b22 ]
             
             """)
@@ -146,16 +149,19 @@ def mostrar_explicacion_operacion(operacion):
 
             Matriz A:
             [ a11  a12 ]
+            
             [ a21  a22 ]
 
 
             Matriz B:
             [ b11  b12 ]
+            
             [ b21  b22 ]
 
 
             Resultado de A - B:
             [ a11 - b11  a12 - b12 ]
+            
             [ a21 - b21  a22 - b22 ]
         """)
     elif operacion == "Multiplicación":
@@ -165,14 +171,17 @@ def mostrar_explicacion_operacion(operacion):
 
             Matriz A:
             [ a11  a12 ]
+            
             [ a21  a22 ]
 
             Matriz B:
             [ b11  b12 ]
+            
             [ b21  b22 ]
 
             Resultado de A * B:
             [ (a11*b11 + a12*b21)  (a11*b12 + a12*b22) ]
+            
             [ (a21*b11 + a22*b21)  (a21*b12 + a22*b22) ]
         """)
 
