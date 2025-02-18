@@ -83,7 +83,11 @@ def formatear_resultado(matriz):
 
 def matriz_a_dataframe(matriz):
     """Convierte una matriz de SymPy en DataFrame para mostrar en Streamlit."""
-    return pd.DataFrame(matriz.tolist())
+    # Asegurarse de que la matriz esté en formato SymPy
+    if isinstance(matriz, Matrix):
+        return pd.DataFrame(matriz.tolist())
+    else:
+        return pd.DataFrame(matriz)
 
 # --- Explicaciones por operación ---
 def mostrar_explicacion_operacion(operacion):
